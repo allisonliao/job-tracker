@@ -25,8 +25,15 @@ public class TableBootstrapper implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        String tableName = props.getTableName();
+        createTableIfNotExists(client, props.getTableName());
+    }
 
+    /**
+     * Idempotent: creates the table with its 3 GSIs if it doesn't already exist.
+     * Shared by the {@code local}-profile startup runner above and by integration
+     * tests (e.g. MiniStackTestBase), so table schema never drifts between the two.
+     */
+    public static void createTableIfNotExists(DynamoDbClient client, String tableName) {
         try {
             client.describeTable(DescribeTableRequest.builder().tableName(tableName).build());
             return; // already exists, nothing to do
