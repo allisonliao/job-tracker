@@ -2,6 +2,7 @@ package com.allisonliao.job_tracker_backend.model;
 
 import java.time.LocalDate;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSortKey;
@@ -33,10 +34,12 @@ public class ApplicationItem {
 
     // getters setters
     @DynamoDbPartitionKey
+    @DynamoDbAttribute("PK")
     public String getPk() { return pk; }
     public void setPk(String pk) { this.pk = pk; }
 
     @DynamoDbSortKey
+    @DynamoDbAttribute("SK")
     public String getSk() { return sk; }
     public void setSk(String sk) { this.sk = sk; }
 
@@ -65,26 +68,32 @@ public class ApplicationItem {
     public void setOfferDecisionDeadline(LocalDate offerDecisionDeadline) { this.offerDecisionDeadline = offerDecisionDeadline; }
 
     @DynamoDbSecondaryPartitionKey(indexNames = "GSI1")
+    @DynamoDbAttribute("GSI1PK")
     public String getGsi1Pk() { return gsi1Pk; }
     public void setGsi1Pk(String gsi1Pk) { this.gsi1Pk = gsi1Pk; }
 
     @DynamoDbSecondarySortKey(indexNames = "GSI1")
+    @DynamoDbAttribute("GSI1SK")
     public String getGsi1Sk() { return gsi1Sk; }
     public void setGsi1Sk(String gsi1Sk) { this.gsi1Sk = gsi1Sk; }
 
     @DynamoDbSecondaryPartitionKey(indexNames = "GSI2")
+    @DynamoDbAttribute("GSI2PK")
     public String getGsi2Pk() { return gsi2Pk; }
     public void setGsi2Pk(String gsi2Pk) { this.gsi2Pk = gsi2Pk; }
 
     @DynamoDbSecondarySortKey(indexNames = "GSI2")
+    @DynamoDbAttribute("GSI2SK")
     public String getGsi2Sk() { return gsi2Sk; }
     public void setGsi2Sk(String gsi2Sk) { this.gsi2Sk = gsi2Sk; }
 
     @DynamoDbSecondaryPartitionKey(indexNames = "GSI3")
+    @DynamoDbAttribute("GSI3PK")
     public String getGsi3Pk() { return gsi3Pk; }
     public void setGsi3Pk(String gsi3Pk) { this.gsi3Pk = gsi3Pk; }
 
     @DynamoDbSecondarySortKey(indexNames = "GSI3")
+    @DynamoDbAttribute("GSI3SK")
     public String getGsi3Sk() { return gsi3Sk; }
     public void setGsi3Sk(String gsi3Sk) { this.gsi3Sk = gsi3Sk; }
 }
