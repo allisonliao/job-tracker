@@ -10,9 +10,12 @@ import org.springframework.stereotype.Repository;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Expression;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.ScanEnhancedRequest;
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 
 import com.allisonliao.job_tracker_backend.config.AwsProperties;
 import com.allisonliao.job_tracker_backend.model.ApplicationItem;
@@ -72,6 +75,24 @@ public class ApplicationRepository {
                 .sortValue("METADATA")
                 .build();
         applicationTable.deleteItem(key);
+    }
+
+    /** All applications, unfiltered — Scan+filter, same tradeoff as CompanyRepository.findAll(). */
+    public List<ApplicationItem> findAll() {
+        Expression filterExpression = Expression.builder()
+                .expression("SK = :sk AND begins_with(PK, :pkPrefix)")
+                .putExpressionValue(":sk", AttributeValue.builder().s("METADATA").build())
+                .putExpressionValue(":pkPrefix", AttributeValue.builder().s("APPLICATION#").build())
+                .build();
+
+        ScanEnhancedRequest scanRequest = ScanEnhancedRequest.builder()
+                .filterExpression(filterExpression)
+                .build();
+
+        return applicationTable.scan(scanRequest)
+                .items()
+                .stream()
+                .collect(Collectors.toList());
     }
 
     // --- GSI-backed access patterns ---
