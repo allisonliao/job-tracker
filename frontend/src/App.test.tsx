@@ -1,17 +1,20 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import App from './App'
+import { renderWithRouter } from './test/testUtils'
 
 describe('App', () => {
-  it('renders the Job Tracker heading', () => {
-    vi.stubGlobal('fetch', vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ status: 'ok' }),
-      } as Response),
-    ))
-
-    render(<App />)
+  it('renders the dashboard heading and nav at the root route', () => {
+    renderWithRouter(<App />)
 
     expect(screen.getByRole('heading', { name: 'Job Tracker' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Applications' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Companies' })).toBeInTheDocument()
+  })
+
+  it('renders the not-found page for an unknown route', () => {
+    renderWithRouter(<App />, { route: '/does-not-exist' })
+
+    expect(screen.getByText('Page not found')).toBeInTheDocument()
   })
 })
