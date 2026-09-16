@@ -1,6 +1,10 @@
 import { Link, useParams } from 'react-router'
+import { addInterview, addNote, changeApplicationStatus } from '../api/applications'
+import { InterviewForm } from '../components/applications/InterviewForm'
 import { InterviewList } from '../components/applications/InterviewList'
+import { NoteForm } from '../components/applications/NoteForm'
 import { NoteList } from '../components/applications/NoteList'
+import { StatusChangeForm } from '../components/applications/StatusChangeForm'
 import { StatusHistoryList } from '../components/applications/StatusHistoryList'
 import { ErrorMessage } from '../components/common/ErrorMessage'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
@@ -9,7 +13,7 @@ import { useCompany } from '../hooks/useCompany'
 
 export function ApplicationDetailPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
-  const { data: application, loading, error } = useApplication(applicationId ?? '')
+  const { data: application, loading, error, refetch } = useApplication(applicationId ?? '')
   const { data: company } = useCompany(application?.companyId ?? '')
 
   if (loading) return <LoadingSpinner />
@@ -36,6 +40,14 @@ export function ApplicationDetailPage() {
         <dd>{application.offerDecisionDeadline ?? '—'}</dd>
       </dl>
 
+      <StatusChangeForm
+        currentStatus={application.currentStatus}
+        onSubmit={async (request) => {
+          await changeApplicationStatus(application.applicationId, request)
+          refetch()
+        }}
+      />
+
       <section>
         <h3>Status history</h3>
         <StatusHistoryList history={application.statusHistory} />
@@ -44,11 +56,23 @@ export function ApplicationDetailPage() {
       <section>
         <h3>Interviews</h3>
         <InterviewList interviews={application.interviews} />
+        <InterviewForm
+          onSubmit={async (request) => {
+            await addInterview(application.applicationId, request)
+            refetch()
+          }}
+        />
       </section>
 
       <section>
         <h3>Notes</h3>
         <NoteList notes={application.notes} />
+        <NoteForm
+          onSubmit={async (request) => {
+            await addNote(application.applicationId, request)
+            refetch()
+          }}
+        />
       </section>
     </div>
   )

@@ -90,6 +90,9 @@ describe('ApplicationFormPage', () => {
     renderWithRouter(<ApplicationFormPage />, { route: '/applications/new' })
 
     expect(screen.getByRole('heading', { name: 'New application' })).toBeInTheDocument()
+    // In create mode there's no applicationId, so useApplication must skip fetching entirely
+    // rather than calling getApplication('') against the real API.
+    expect(getApplicationMock).not.toHaveBeenCalled()
 
     await user.selectOptions(await screen.findByLabelText('Company'), 'c1')
     await user.selectOptions(await screen.findByLabelText('Job posting'), 'j1')

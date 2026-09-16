@@ -73,4 +73,30 @@ describe('useAsyncData', () => {
     await waitFor(() => expect(result.current.data).toEqual({ value: 'second' }))
     expect(fetcher).toHaveBeenCalledTimes(2)
   })
+
+  it('does not call the fetcher at all when disabled', () => {
+    const fetcher = vi.fn(() => Promise.resolve({ value: 1 }))
+
+    const { result } = renderHook(() => useAsyncData(fetcher, [], false))
+
+    expect(fetcher).not.toHaveBeenCalled()
+    expect(result.current.loading).toBe(false)
+    expect(result.current.data).toBeNull()
+  })
+
+  it('starts fetching once enabled flips to true', async () => {
+    const fetcher = vi.fn(() => Promise.resolve({ value: 1 }))
+
+    const { result, rerender } = renderHook(
+      ({ enabled }: { enabled: boolean }) => useAsyncData(fetcher, [], enabled),
+      { initialProps: { enabled: false } },
+    )
+
+    expect(fetcher).not.toHaveBeenCalled()
+
+    rerender({ enabled: true })
+
+    await waitFor(() => expect(result.current.data).toEqual({ value: 1 }))
+    expect(fetcher).toHaveBeenCalledTimes(1)
+  })
 })

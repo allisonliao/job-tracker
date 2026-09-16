@@ -7,14 +7,19 @@ interface AsyncState<T> {
   error: string | null
 }
 
-export function useAsyncData<T>(fetcher: () => Promise<T>, deps: unknown[]) {
+export function useAsyncData<T>(fetcher: () => Promise<T>, deps: unknown[], enabled = true) {
   const [state, setState] = useState<AsyncState<T>>({
     data: null,
-    loading: true,
+    loading: enabled,
     error: null,
   })
 
   const run = useCallback(() => {
+    if (!enabled) {
+      setState({ data: null, loading: false, error: null })
+      return
+    }
+
     let cancelled = false
     setState((prev) => ({ ...prev, loading: true, error: null }))
 
@@ -32,7 +37,7 @@ export function useAsyncData<T>(fetcher: () => Promise<T>, deps: unknown[]) {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps)
+  }, [...deps, enabled])
 
   useEffect(() => run(), [run])
 

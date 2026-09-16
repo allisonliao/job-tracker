@@ -122,3 +122,125 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+h3 {
+  font-size: 18px;
+  margin: 24px 0 8px;
+  color: var(--text-h);
+}
+
+section {
+  margin-bottom: 16px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.inline-form,
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.inline-form label,
+.filters label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.inline-form input,
+.inline-form select,
+.filters input,
+.filters select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.inline-form button {
+  font: inherit;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+.inline-form button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #d92d20;
+}
+
+.empty-state {
+  color: var(--text);
+}
+
+.company-list {
+  list-style: none;
+  padding: 0;
+}
+
+.company-list > li {
+  border-bottom: 1px solid var(--border);
+  padding: 8px 0;
+}
+
+.company-list button {
+  font: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-h);
+  padding: 4px 0;
+}
+
+.company-detail {
+  padding: 8px 0 16px 20px;
+}
+
+.summary-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0 24px;
+}
+
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-width: 120px;
+}
+
+.summary-card strong {
+  font-size: 24px;
+  color: var(--text-h);
+}
+
+.summary-card span {
+  font-size: 13px;
+}
