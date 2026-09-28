@@ -15,10 +15,6 @@ export function listApplications() {
   return api.get<ApplicationResponse[]>('/api/applications')
 }
 
-export function listApplicationsForCompany(companyId: string) {
-  return api.get<ApplicationResponse[]>(`/api/applications?companyId=${companyId}`)
-}
-
 export function listUpcomingFollowUps(dueBy?: string) {
   const qs = dueBy ? `?dueBy=${dueBy}` : ''
   return api.get<ApplicationResponse[]>(`/api/applications/upcoming${qs}`)

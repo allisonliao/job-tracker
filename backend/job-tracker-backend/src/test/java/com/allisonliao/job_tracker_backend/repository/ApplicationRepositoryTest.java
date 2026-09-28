@@ -22,19 +22,17 @@ class ApplicationRepositoryTest extends MiniStackTestBase {
     @Autowired
     private ApplicationRepository applicationRepository;
 
-    private ApplicationItem newApplication(String applicationId, String companyId, String status,
+    private ApplicationItem newApplication(String applicationId, String companyName, String status,
                                             LocalDate dateApplied, LocalDate followUpDate) {
         ApplicationItem item = new ApplicationItem();
         item.setPk("APPLICATION#" + applicationId);
         item.setSk("METADATA");
         item.setApplicationId(applicationId);
-        item.setCompanyId(companyId);
-        item.setJobPostingId(UUID.randomUUID().toString());
+        item.setCompanyName(companyName);
+        item.setApplicationLink("https://example.com/job/" + UUID.randomUUID());
         item.setCurrentStatus(status);
         item.setDateApplied(dateApplied);
 
-        item.setGsi1Pk("COMPANY#" + companyId);
-        item.setGsi1Sk("APPLICATION#" + applicationId);
         item.setGsi2Pk("STATUS#" + status);
         item.setGsi2Sk(dateApplied.toString());
 
@@ -50,8 +48,7 @@ class ApplicationRepositoryTest extends MiniStackTestBase {
     @Test
     void savesAndFindsApplicationById() {
         String applicationId = UUID.randomUUID().toString();
-        String companyId = UUID.randomUUID().toString();
-        applicationRepository.save(newApplication(applicationId, companyId, "Applied",
+        applicationRepository.save(newApplication(applicationId, "Acme Co", "Applied",
                 LocalDate.of(2026, 9, 1), null));
 
         Optional<ApplicationItem> found = applicationRepository.findById(applicationId);
@@ -61,33 +58,13 @@ class ApplicationRepositoryTest extends MiniStackTestBase {
     }
 
     @Test
-    void findAllForCompanyUsesGsi1() {
-        String companyId = UUID.randomUUID().toString();
-        String otherCompanyId = UUID.randomUUID().toString();
-        String app1 = UUID.randomUUID().toString();
-        String app2 = UUID.randomUUID().toString();
-        String otherApp = UUID.randomUUID().toString();
-
-        applicationRepository.save(newApplication(app1, companyId, "Applied", LocalDate.of(2026, 9, 1), null));
-        applicationRepository.save(newApplication(app2, companyId, "Interviewing", LocalDate.of(2026, 9, 2), null));
-        applicationRepository.save(newApplication(otherApp, otherCompanyId, "Applied", LocalDate.of(2026, 9, 1), null));
-
-        List<ApplicationItem> results = applicationRepository.findAllForCompany(companyId);
-
-        assertThat(results)
-                .extracting(ApplicationItem::getApplicationId)
-                .containsExactlyInAnyOrder(app1, app2);
-    }
-
-    @Test
     void findByStatusUsesGsi2() {
-        String companyId = UUID.randomUUID().toString();
         String statusValue = "Offer-" + UUID.randomUUID(); // unique per test run to avoid cross-test collisions
         String app1 = UUID.randomUUID().toString();
         String app2 = UUID.randomUUID().toString();
 
-        applicationRepository.save(newApplication(app1, companyId, statusValue, LocalDate.of(2026, 9, 1), null));
-        applicationRepository.save(newApplication(app2, companyId, "Applied", LocalDate.of(2026, 9, 2), null));
+        applicationRepository.save(newApplication(app1, "Acme Co", statusValue, LocalDate.of(2026, 9, 1), null));
+        applicationRepository.save(newApplication(app2, "Acme Co", "Applied", LocalDate.of(2026, 9, 2), null));
 
         List<ApplicationItem> results = applicationRepository.findByStatus(statusValue);
 
@@ -98,16 +75,15 @@ class ApplicationRepositoryTest extends MiniStackTestBase {
 
     @Test
     void findFollowUpsDueByReturnsOnlyApplicationsWithFollowUpOnOrBeforeCutoff() {
-        String companyId = UUID.randomUUID().toString();
         String dueSoon = UUID.randomUUID().toString();
         String dueLater = UUID.randomUUID().toString();
         String noFollowUp = UUID.randomUUID().toString();
 
-        applicationRepository.save(newApplication(dueSoon, companyId, "Applied",
+        applicationRepository.save(newApplication(dueSoon, "Acme Co", "Applied",
                 LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5)));
-        applicationRepository.save(newApplication(dueLater, companyId, "Applied",
+        applicationRepository.save(newApplication(dueLater, "Acme Co", "Applied",
                 LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 1)));
-        applicationRepository.save(newApplication(noFollowUp, companyId, "Applied",
+        applicationRepository.save(newApplication(noFollowUp, "Acme Co", "Applied",
                 LocalDate.of(2026, 9, 1), null));
 
         List<ApplicationItem> results = applicationRepository.findFollowUpsDueBy(LocalDate.of(2026, 9, 10));
@@ -123,9 +99,8 @@ class ApplicationRepositoryTest extends MiniStackTestBase {
         // This directly verifies the GSI3 sparsity assumption flagged during planning:
         // an application with no followUpDate must not appear in the byFollowUp index
         // at all, even when queried with a cutoff far in the future.
-        String companyId = UUID.randomUUID().toString();
         String applicationId = UUID.randomUUID().toString();
-        applicationRepository.save(newApplication(applicationId, companyId, "Applied",
+        applicationRepository.save(newApplication(applicationId, "Acme Co", "Applied",
                 LocalDate.of(2026, 9, 1), null));
 
         List<ApplicationItem> results = applicationRepository.findFollowUpsDueBy(LocalDate.of(2099, 1, 1));

@@ -9,12 +9,10 @@ import { StatusHistoryList } from '../components/applications/StatusHistoryList'
 import { ErrorMessage } from '../components/common/ErrorMessage'
 import { LoadingSpinner } from '../components/common/LoadingSpinner'
 import { useApplication } from '../hooks/useApplication'
-import { useCompany } from '../hooks/useCompany'
 
 export function ApplicationDetailPage() {
   const { applicationId } = useParams<{ applicationId: string }>()
   const { data: application, loading, error, refetch } = useApplication(applicationId ?? '')
-  const { data: company } = useCompany(application?.companyId ?? '')
 
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorMessage message={error} />
@@ -22,7 +20,7 @@ export function ApplicationDetailPage() {
 
   return (
     <div>
-      <h2>{company?.name ?? application.companyId}</h2>
+      <h2>{application.companyName}</h2>
       <p>
         <Link to={`/applications/${application.applicationId}/edit`}>Edit</Link>
       </p>
@@ -30,6 +28,16 @@ export function ApplicationDetailPage() {
       <dl>
         <dt>Status</dt>
         <dd>{application.currentStatus}</dd>
+        <dt>Application link</dt>
+        <dd>
+          {application.applicationLink ? (
+            <a href={application.applicationLink} target="_blank" rel="noreferrer">
+              {application.applicationLink}
+            </a>
+          ) : (
+            '—'
+          )}
+        </dd>
         <dt>Date applied</dt>
         <dd>{application.dateApplied ?? '—'}</dd>
         <dt>Last contact</dt>

@@ -29,7 +29,7 @@ public class TableBootstrapper implements ApplicationRunner {
     }
 
     /**
-     * Idempotent: creates the table with its 3 GSIs if it doesn't already exist.
+     * Idempotent: creates the table with its 2 GSIs if it doesn't already exist.
      * Shared by the {@code local}-profile startup runner above and by integration
      * tests (e.g. MiniStackTestBase), so table schema never drifts between the two.
      */
@@ -46,14 +46,12 @@ public class TableBootstrapper implements ApplicationRunner {
                 .billingMode(BillingMode.PAY_PER_REQUEST)
                 .attributeDefinitions(
                         attr("PK"), attr("SK"),
-                        attr("GSI1PK"), attr("GSI1SK"),
                         attr("GSI2PK"), attr("GSI2SK"),
                         attr("GSI3PK"), attr("GSI3SK"))
                 .keySchema(
                         key("PK", KeyType.HASH),
                         key("SK", KeyType.RANGE))
                 .globalSecondaryIndexes(
-                        gsi("GSI1", "GSI1PK", "GSI1SK"),
                         gsi("GSI2", "GSI2PK", "GSI2SK"),
                         gsi("GSI3", "GSI3PK", "GSI3SK"))
                 .build());

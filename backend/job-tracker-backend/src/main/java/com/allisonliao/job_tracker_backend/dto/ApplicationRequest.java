@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import jakarta.validation.constraints.NotBlank;
 
 public record ApplicationRequest(
-        @NotBlank String companyId,
-        String jobPostingId,
+        @NotBlank String companyName,
+        String applicationLink,
         @NotBlank String currentStatus,
         LocalDate dateApplied,
         LocalDate lastContactDate,

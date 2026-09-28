@@ -43,16 +43,10 @@ public class ApplicationController {
     }
 
     @GetMapping
-    public List<ApplicationResponse> getAll(@RequestParam(required = false) String status,
-                                             @RequestParam(required = false) String companyId) {
-        List<ApplicationItem> items;
-        if (companyId != null) {
-            items = applicationService.listForCompany(companyId);
-        } else if (status != null) {
-            items = applicationService.listByStatus(status);
-        } else {
-            items = applicationService.listAll();
-        }
+    public List<ApplicationResponse> getAll(@RequestParam(required = false) String status) {
+        List<ApplicationItem> items = status != null
+                ? applicationService.listByStatus(status)
+                : applicationService.listAll();
         return items.stream().map(ApplicationResponse::from).toList();
     }
 
@@ -136,8 +130,8 @@ public class ApplicationController {
 
     private ApplicationItem toItem(ApplicationRequest request) {
         ApplicationItem item = new ApplicationItem();
-        item.setCompanyId(request.companyId());
-        item.setJobPostingId(request.jobPostingId());
+        item.setCompanyName(request.companyName());
+        item.setApplicationLink(request.applicationLink());
         item.setCurrentStatus(request.currentStatus());
         item.setDateApplied(request.dateApplied());
         item.setLastContactDate(request.lastContactDate());

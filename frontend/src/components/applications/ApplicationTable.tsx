@@ -3,10 +3,9 @@ import type { ApplicationResponse } from '../../types/application'
 
 interface ApplicationTableProps {
   applications: ApplicationResponse[]
-  companyNameById: Map<string, string>
 }
 
-export function ApplicationTable({ applications, companyNameById }: ApplicationTableProps) {
+export function ApplicationTable({ applications }: ApplicationTableProps) {
   return (
     <table>
       <thead>
@@ -21,9 +20,7 @@ export function ApplicationTable({ applications, companyNameById }: ApplicationT
         {applications.map((application) => (
           <tr key={application.applicationId}>
             <td>
-              <Link to={`/applications/${application.applicationId}`}>
-                {companyNameById.get(application.companyId) ?? application.companyId}
-              </Link>
+              <Link to={`/applications/${application.applicationId}`}>{application.companyName}</Link>
             </td>
             <td>{application.currentStatus}</td>
             <td>{application.dateApplied ?? '—'}</td>

@@ -43,7 +43,7 @@ class ApplicationServiceTest {
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         ApplicationItem draft = new ApplicationItem();
-        draft.setCompanyId("company-1");
+        draft.setCompanyName("Acme Co");
         draft.setCurrentStatus("Applied");
         draft.setDateApplied(LocalDate.of(2026, 9, 1));
 
@@ -52,8 +52,6 @@ class ApplicationServiceTest {
         assertThat(saved.getApplicationId()).isNotBlank();
         assertThat(saved.getPk()).isEqualTo("APPLICATION#" + saved.getApplicationId());
         assertThat(saved.getSk()).isEqualTo("METADATA");
-        assertThat(saved.getGsi1Pk()).isEqualTo("COMPANY#company-1");
-        assertThat(saved.getGsi1Sk()).isEqualTo("APPLICATION#" + saved.getApplicationId());
         assertThat(saved.getGsi2Pk()).isEqualTo("STATUS#Applied");
         assertThat(saved.getGsi2Sk()).isEqualTo("2026-09-01");
         assertThat(saved.getGsi3Pk()).isNull();
@@ -66,7 +64,7 @@ class ApplicationServiceTest {
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         ApplicationItem draft = new ApplicationItem();
-        draft.setCompanyId("company-1");
+        draft.setCompanyName("Acme Co");
         draft.setCurrentStatus("Applied");
         draft.setDateApplied(LocalDate.of(2026, 9, 1));
         draft.setFollowUpDate(LocalDate.of(2026, 9, 10));
@@ -84,7 +82,7 @@ class ApplicationServiceTest {
         existing.setApplicationId("app-1");
         existing.setPk("APPLICATION#app-1");
         existing.setSk("METADATA");
-        existing.setCompanyId("company-1");
+        existing.setCompanyName("Acme Co");
         existing.setCurrentStatus("Applied");
         existing.setDateApplied(LocalDate.of(2026, 9, 1));
 
@@ -109,7 +107,7 @@ class ApplicationServiceTest {
         applicationService = service();
         ApplicationItem existing = new ApplicationItem();
         existing.setApplicationId("app-1");
-        existing.setCompanyId("company-1");
+        existing.setCompanyName("Acme Co");
         existing.setCurrentStatus("Applied");
         existing.setDateApplied(LocalDate.of(2026, 9, 1));
 
@@ -117,7 +115,7 @@ class ApplicationServiceTest {
         when(applicationRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         ApplicationItem attemptedUpdate = new ApplicationItem();
-        attemptedUpdate.setCompanyId("company-1");
+        attemptedUpdate.setCompanyName("Acme Co");
         attemptedUpdate.setCurrentStatus("Offer"); // should be ignored by update()
         attemptedUpdate.setDateApplied(LocalDate.of(2026, 9, 1));
         attemptedUpdate.setLastContactDate(LocalDate.of(2026, 9, 15));

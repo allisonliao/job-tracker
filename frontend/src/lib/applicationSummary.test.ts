@@ -4,8 +4,8 @@ import { computeApplicationSummary } from './applicationSummary'
 function application(overrides: Partial<ApplicationResponse>): ApplicationResponse {
   return {
     applicationId: 'a',
-    companyId: 'c',
-    jobPostingId: null,
+    companyName: 'Acme Co',
+    applicationLink: null,
     currentStatus: 'Applied',
     dateApplied: null,
     lastContactDate: null,

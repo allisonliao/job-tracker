@@ -9,7 +9,6 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: 'Job Tracker' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Dashboard' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Applications' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Companies' })).toBeInTheDocument()
   })
 
   it('renders the not-found page for an unknown route', () => {

@@ -10,8 +10,8 @@ import com.allisonliao.job_tracker_backend.model.StatusChangeItem;
 
 public record ApplicationDetailResponse(
         String applicationId,
-        String companyId,
-        String jobPostingId,
+        String companyName,
+        String applicationLink,
         String currentStatus,
         LocalDate dateApplied,
         LocalDate lastContactDate,
@@ -27,8 +27,8 @@ public record ApplicationDetailResponse(
                                                   List<NoteItem> notes) {
         return new ApplicationDetailResponse(
                 application.getApplicationId(),
-                application.getCompanyId(),
-                application.getJobPostingId(),
+                application.getCompanyName(),
+                application.getApplicationLink(),
                 application.getCurrentStatus(),
                 application.getDateApplied(),
                 application.getLastContactDate(),

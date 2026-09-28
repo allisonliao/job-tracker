@@ -27,7 +27,6 @@ import com.allisonliao.job_tracker_backend.model.StatusChangeItem;
 public class ApplicationRepository {
 
     private final DynamoDbTable<ApplicationItem> applicationTable;
-    private final DynamoDbIndex<ApplicationItem> byCompanyIndex;
     private final DynamoDbIndex<ApplicationItem> byStatusIndex;
     private final DynamoDbIndex<ApplicationItem> byFollowUpIndex;
 
@@ -38,7 +37,6 @@ public class ApplicationRepository {
     public ApplicationRepository(DynamoDbEnhancedClient enhancedClient, AwsProperties props) {
         String tableName = props.getTableName();
         this.applicationTable = enhancedClient.table(tableName, TableSchema.fromBean(ApplicationItem.class));
-        this.byCompanyIndex = applicationTable.index("GSI1");
         this.byStatusIndex = applicationTable.index("GSI2");
         this.byFollowUpIndex = applicationTable.index("GSI3");
 
@@ -77,7 +75,7 @@ public class ApplicationRepository {
         applicationTable.deleteItem(key);
     }
 
-    /** All applications, unfiltered — Scan+filter, same tradeoff as CompanyRepository.findAll(). */
+    /** All applications, unfiltered — Scan+filter over the whole table. */
     public List<ApplicationItem> findAll() {
         Expression filterExpression = Expression.builder()
                 .expression("SK = :sk AND begins_with(PK, :pkPrefix)")
@@ -96,14 +94,6 @@ public class ApplicationRepository {
     }
 
     // --- GSI-backed access patterns ---
-
-    public List<ApplicationItem> findAllForCompany(String companyId) {
-        QueryConditional condition = QueryConditional.keyEqualTo(
-                Key.builder().partitionValue("COMPANY#" + companyId).build());
-        return byCompanyIndex.query(condition).stream()
-                .flatMap(page -> page.items().stream())
-                .collect(Collectors.toList());
-    }
 
     public List<ApplicationItem> findByStatus(String status) {
         QueryConditional condition = QueryConditional.keyEqualTo(

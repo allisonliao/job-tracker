@@ -196,29 +196,6 @@ td {
   color: var(--text);
 }
 
-.company-list {
-  list-style: none;
-  padding: 0;
-}
-
-.company-list > li {
-  border-bottom: 1px solid var(--border);
-  padding: 8px 0;
-}
-
-.company-list button {
-  font: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-h);
-  padding: 4px 0;
-}
-
-.company-detail {
-  padding: 8px 0 16px 20px;
-}
-
 .summary-cards {
   display: flex;
   flex-wrap: wrap;

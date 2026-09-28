@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
-import { useCompanies } from '../../hooks/useCompanies'
-import { useJobPostings } from '../../hooks/useJobPostings'
 import { COMMON_STATUSES } from '../../lib/statusOptions'
 import type { ApplicationRequest } from '../../types/application'
 
@@ -12,8 +10,8 @@ interface ApplicationFormProps {
 }
 
 interface FormState {
-  companyId: string
-  jobPostingId: string
+  companyName: string
+  applicationLink: string
   currentStatus: string
   dateApplied: string
   lastContactDate: string
@@ -23,8 +21,8 @@ interface FormState {
 
 function toFormState(request?: ApplicationRequest): FormState {
   return {
-    companyId: request?.companyId ?? '',
-    jobPostingId: request?.jobPostingId ?? '',
+    companyName: request?.companyName ?? '',
+    applicationLink: request?.applicationLink ?? '',
     currentStatus: request?.currentStatus ?? '',
     dateApplied: request?.dateApplied ?? '',
     lastContactDate: request?.lastContactDate ?? '',
@@ -35,8 +33,8 @@ function toFormState(request?: ApplicationRequest): FormState {
 
 function toRequest(form: FormState): ApplicationRequest {
   return {
-    companyId: form.companyId,
-    jobPostingId: form.jobPostingId || null,
+    companyName: form.companyName,
+    applicationLink: form.applicationLink || null,
     currentStatus: form.currentStatus,
     dateApplied: form.dateApplied || null,
     lastContactDate: form.lastContactDate || null,
@@ -50,12 +48,9 @@ export function ApplicationForm({ initialValues, onSubmit, submitLabel = 'Save' 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const companies = useCompanies()
-  const jobPostings = useJobPostings(form.companyId)
-
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!form.companyId || !form.currentStatus.trim()) return
+    if (!form.companyName.trim() || !form.currentStatus.trim()) return
 
     setSubmitting(true)
     setError(null)
@@ -72,34 +67,22 @@ export function ApplicationForm({ initialValues, onSubmit, submitLabel = 'Save' 
     <form className="application-form" onSubmit={handleSubmit}>
       <label>
         Company
-        <select
-          value={form.companyId}
-          onChange={(e) => setForm({ ...form, companyId: e.target.value, jobPostingId: '' })}
+        <input
+          type="text"
+          value={form.companyName}
+          onChange={(e) => setForm({ ...form, companyName: e.target.value })}
           required
-        >
-          <option value="">Select a company</option>
-          {companies.data?.map((company) => (
-            <option key={company.companyId} value={company.companyId}>
-              {company.name}
-            </option>
-          ))}
-        </select>
+        />
       </label>
 
       <label>
-        Job posting
-        <select
-          value={form.jobPostingId}
-          onChange={(e) => setForm({ ...form, jobPostingId: e.target.value })}
-          disabled={!form.companyId}
-        >
-          <option value="">(none)</option>
-          {jobPostings.data?.map((job) => (
-            <option key={job.jobId} value={job.jobId}>
-              {job.title}
-            </option>
-          ))}
-        </select>
+        Application link
+        <input
+          type="url"
+          placeholder="https://…"
+          value={form.applicationLink}
+          onChange={(e) => setForm({ ...form, applicationLink: e.target.value })}
+        />
       </label>
 
       <label>

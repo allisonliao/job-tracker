@@ -6,8 +6,8 @@ import com.allisonliao.job_tracker_backend.model.ApplicationItem;
 
 public record ApplicationResponse(
         String applicationId,
-        String companyId,
-        String jobPostingId,
+        String companyName,
+        String applicationLink,
         String currentStatus,
         LocalDate dateApplied,
         LocalDate lastContactDate,
@@ -17,8 +17,8 @@ public record ApplicationResponse(
     public static ApplicationResponse from(ApplicationItem item) {
         return new ApplicationResponse(
                 item.getApplicationId(),
-                item.getCompanyId(),
-                item.getJobPostingId(),
+                item.getCompanyName(),
+                item.getApplicationLink(),
                 item.getCurrentStatus(),
                 item.getDateApplied(),
                 item.getLastContactDate(),

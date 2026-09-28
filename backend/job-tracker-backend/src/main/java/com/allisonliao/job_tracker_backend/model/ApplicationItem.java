@@ -16,8 +16,8 @@ public class ApplicationItem {
     private String pk;
     private String sk;
     private String applicationId;
-    private String companyId;
-    private String jobPostingId;
+    private String companyName;
+    private String applicationLink;
     private String currentStatus;
     private LocalDate dateApplied;
     private LocalDate lastContactDate;
@@ -25,8 +25,6 @@ public class ApplicationItem {
     private LocalDate offerDecisionDeadline;
 
     // gsi fields
-    private String gsi1Pk;
-    private String gsi1Sk;
     private String gsi2Pk;
     private String gsi2Sk;
     private String gsi3Pk;
@@ -46,11 +44,11 @@ public class ApplicationItem {
     public String getApplicationId() { return applicationId; }
     public void setApplicationId(String applicationId) { this.applicationId = applicationId; }
 
-    public String getCompanyId() { return companyId; }
-    public void setCompanyId(String companyId) { this.companyId = companyId; }
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-    public String getJobPostingId() { return jobPostingId; }
-    public void setJobPostingId(String jobPostingId) { this.jobPostingId = jobPostingId; }
+    public String getApplicationLink() { return applicationLink; }
+    public void setApplicationLink(String applicationLink) { this.applicationLink = applicationLink; }
 
     public String getCurrentStatus() { return currentStatus; }
     public void setCurrentStatus(String currentStatus) { this.currentStatus = currentStatus; }
@@ -66,16 +64,6 @@ public class ApplicationItem {
 
     public LocalDate getOfferDecisionDeadline() { return offerDecisionDeadline; }
     public void setOfferDecisionDeadline(LocalDate offerDecisionDeadline) { this.offerDecisionDeadline = offerDecisionDeadline; }
-
-    @DynamoDbSecondaryPartitionKey(indexNames = "GSI1")
-    @DynamoDbAttribute("GSI1PK")
-    public String getGsi1Pk() { return gsi1Pk; }
-    public void setGsi1Pk(String gsi1Pk) { this.gsi1Pk = gsi1Pk; }
-
-    @DynamoDbSecondarySortKey(indexNames = "GSI1")
-    @DynamoDbAttribute("GSI1SK")
-    public String getGsi1Sk() { return gsi1Sk; }
-    public void setGsi1Sk(String gsi1Sk) { this.gsi1Sk = gsi1Sk; }
 
     @DynamoDbSecondaryPartitionKey(indexNames = "GSI2")
     @DynamoDbAttribute("GSI2PK")

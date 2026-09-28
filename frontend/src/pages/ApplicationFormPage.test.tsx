@@ -2,24 +2,13 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import type { ApplicationDetailResponse, ApplicationResponse } from '../types/application'
-import type { CompanyResponse } from '../types/company'
-import type { JobPostingResponse } from '../types/jobPosting'
 import { renderWithRouter } from '../test/testUtils'
 import { ApplicationFormPage } from './ApplicationFormPage'
 
-const {
-  createApplicationMock,
-  updateApplicationMock,
-  getApplicationMock,
-  listCompaniesMock,
-  listJobPostingsMock,
-  navigateMock,
-} = vi.hoisted(() => ({
+const { createApplicationMock, updateApplicationMock, getApplicationMock, navigateMock } = vi.hoisted(() => ({
   createApplicationMock: vi.fn(),
   updateApplicationMock: vi.fn(),
   getApplicationMock: vi.fn(),
-  listCompaniesMock: vi.fn(),
-  listJobPostingsMock: vi.fn(),
   navigateMock: vi.fn(),
 }))
 
@@ -29,41 +18,15 @@ vi.mock('../api/applications', () => ({
   getApplication: getApplicationMock,
 }))
 
-vi.mock('../api/companies', () => ({
-  listCompanies: listCompaniesMock,
-}))
-
-vi.mock('../api/jobPostings', () => ({
-  listJobPostings: listJobPostingsMock,
-}))
-
 vi.mock('react-router', async (importOriginal) => {
   const actual = await importOriginal<typeof import('react-router')>()
   return { ...actual, useNavigate: () => navigateMock }
 })
 
-const company: CompanyResponse = {
-  companyId: 'c1',
-  name: 'Acme Corp',
-  website: null,
-  industry: null,
-  notes: null,
-}
-
-const jobPosting: JobPostingResponse = {
-  jobId: 'j1',
-  companyId: 'c1',
-  title: 'Backend Engineer',
-  url: null,
-  location: null,
-  dateFound: null,
-  applicationDeadline: null,
-}
-
 const createdApplication: ApplicationResponse = {
   applicationId: 'new-app-id',
-  companyId: 'c1',
-  jobPostingId: 'j1',
+  companyName: 'Acme Corp',
+  applicationLink: 'https://acme.example/jobs/1',
   currentStatus: 'Applied',
   dateApplied: null,
   lastContactDate: null,
@@ -76,11 +39,7 @@ describe('ApplicationFormPage', () => {
     createApplicationMock.mockReset()
     updateApplicationMock.mockReset()
     getApplicationMock.mockReset()
-    listCompaniesMock.mockReset()
-    listJobPostingsMock.mockReset()
     navigateMock.mockReset()
-    listCompaniesMock.mockResolvedValue([company])
-    listJobPostingsMock.mockResolvedValue([jobPosting])
   })
 
   it('creates a new application and navigates to its detail page', async () => {
@@ -94,15 +53,15 @@ describe('ApplicationFormPage', () => {
     // rather than calling getApplication('') against the real API.
     expect(getApplicationMock).not.toHaveBeenCalled()
 
-    await user.selectOptions(await screen.findByLabelText('Company'), 'c1')
-    await user.selectOptions(await screen.findByLabelText('Job posting'), 'j1')
+    await user.type(screen.getByLabelText('Company'), 'Acme Corp')
+    await user.type(screen.getByLabelText('Application link'), 'https://acme.example/jobs/1')
     await user.type(screen.getByLabelText('Status'), 'Applied')
     await user.click(screen.getByRole('button', { name: 'Create application' }))
 
     await waitFor(() =>
       expect(createApplicationMock).toHaveBeenCalledWith({
-        companyId: 'c1',
-        jobPostingId: 'j1',
+        companyName: 'Acme Corp',
+        applicationLink: 'https://acme.example/jobs/1',
         currentStatus: 'Applied',
         dateApplied: null,
         lastContactDate: null,
@@ -113,7 +72,7 @@ describe('ApplicationFormPage', () => {
     expect(navigateMock).toHaveBeenCalledWith('/applications/new-app-id')
   })
 
-  it('does not submit without selecting a company or entering a status', async () => {
+  it('does not submit without entering a company or a status', async () => {
     const user = userEvent.setup()
 
     renderWithRouter(<ApplicationFormPage />, { route: '/applications/new' })
@@ -128,8 +87,8 @@ describe('ApplicationFormPage', () => {
     const user = userEvent.setup()
     const existing: ApplicationDetailResponse = {
       applicationId: 'a1',
-      companyId: 'c1',
-      jobPostingId: 'j1',
+      companyName: 'Acme Corp',
+      applicationLink: null,
       currentStatus: 'Applied',
       dateApplied: '2026-09-01',
       lastContactDate: null,
@@ -151,13 +110,14 @@ describe('ApplicationFormPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'Edit application' })).toBeInTheDocument()
     expect(await screen.findByDisplayValue('Applied')).toBeInTheDocument()
+    expect(screen.getByDisplayValue('Acme Corp')).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Save changes' }))
 
     await waitFor(() =>
       expect(updateApplicationMock).toHaveBeenCalledWith(
         'a1',
-        expect.objectContaining({ companyId: 'c1', currentStatus: 'Applied' }),
+        expect.objectContaining({ companyName: 'Acme Corp', currentStatus: 'Applied' }),
       ),
     )
     expect(navigateMock).toHaveBeenCalledWith('/applications/a1')

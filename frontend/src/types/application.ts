@@ -1,7 +1,7 @@
 export interface ApplicationResponse {
   applicationId: string
-  companyId: string
-  jobPostingId: string | null
+  companyName: string
+  applicationLink: string | null
   currentStatus: string
   dateApplied: string | null // ISO date "yyyy-MM-dd"
   lastContactDate: string | null
@@ -10,8 +10,8 @@ export interface ApplicationResponse {
 }
 
 export interface ApplicationRequest {
-  companyId: string
-  jobPostingId?: string | null
+  companyName: string
+  applicationLink?: string | null
   currentStatus: string
   dateApplied?: string | null
   lastContactDate?: string | null

@@ -2,18 +2,15 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import type { ApplicationDetailResponse } from '../types/application'
-import type { CompanyResponse } from '../types/company'
 import { renderWithRouter } from '../test/testUtils'
 import { ApplicationDetailPage } from './ApplicationDetailPage'
 
-const { getApplicationMock, getCompanyMock, changeApplicationStatusMock, addInterviewMock, addNoteMock } =
-  vi.hoisted(() => ({
-    getApplicationMock: vi.fn(),
-    getCompanyMock: vi.fn(),
-    changeApplicationStatusMock: vi.fn(),
-    addInterviewMock: vi.fn(),
-    addNoteMock: vi.fn(),
-  }))
+const { getApplicationMock, changeApplicationStatusMock, addInterviewMock, addNoteMock } = vi.hoisted(() => ({
+  getApplicationMock: vi.fn(),
+  changeApplicationStatusMock: vi.fn(),
+  addInterviewMock: vi.fn(),
+  addNoteMock: vi.fn(),
+}))
 
 vi.mock('../api/applications', () => ({
   getApplication: getApplicationMock,
@@ -22,14 +19,10 @@ vi.mock('../api/applications', () => ({
   addNote: addNoteMock,
 }))
 
-vi.mock('../api/companies', () => ({
-  getCompany: getCompanyMock,
-}))
-
 const detail: ApplicationDetailResponse = {
   applicationId: 'a1',
-  companyId: 'c1',
-  jobPostingId: null,
+  companyName: 'Acme Corp',
+  applicationLink: 'https://acme.example/jobs/1',
   currentStatus: 'Interviewing',
   dateApplied: '2026-09-01',
   lastContactDate: null,
@@ -40,14 +33,6 @@ const detail: ApplicationDetailResponse = {
     { changedAt: '2026-09-05T09:00:00Z', fromStatus: 'Applied', toStatus: 'Interviewing', note: null },
   ],
   notes: [{ createdAt: '2026-09-06T08:00:00Z', text: 'Seems promising' }],
-}
-
-const company: CompanyResponse = {
-  companyId: 'c1',
-  name: 'Acme Corp',
-  website: null,
-  industry: null,
-  notes: null,
 }
 
 function renderDetailPage() {
@@ -62,7 +47,6 @@ function renderDetailPage() {
 describe('ApplicationDetailPage', () => {
   beforeEach(() => {
     getApplicationMock.mockReset()
-    getCompanyMock.mockReset()
     changeApplicationStatusMock.mockReset()
     addInterviewMock.mockReset()
     addNoteMock.mockReset()
@@ -70,12 +54,12 @@ describe('ApplicationDetailPage', () => {
 
   it('shows application detail with interviews, status history, and notes', async () => {
     getApplicationMock.mockResolvedValue(detail)
-    getCompanyMock.mockResolvedValue(company)
 
     renderDetailPage()
 
     expect(await screen.findByRole('heading', { name: 'Acme Corp' })).toBeInTheDocument()
     expect(screen.getByText('Interviewing', { selector: 'dd' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'https://acme.example/jobs/1' })).toBeInTheDocument()
     expect(screen.getByText(/Phone Screen/)).toBeInTheDocument()
     expect(screen.getByText(/Seems promising/)).toBeInTheDocument()
     expect(screen.getByText(/Applied/)).toBeInTheDocument()
@@ -88,7 +72,6 @@ describe('ApplicationDetailPage', () => {
       statusHistory: [],
       notes: [],
     })
-    getCompanyMock.mockResolvedValue(company)
 
     renderDetailPage()
 
@@ -98,21 +81,11 @@ describe('ApplicationDetailPage', () => {
     expect(screen.getByText('No notes yet.')).toBeInTheDocument()
   })
 
-  it('falls back to the raw companyId in the heading if the company has not resolved', async () => {
-    getApplicationMock.mockResolvedValue(detail)
-    getCompanyMock.mockRejectedValue(new Error('not found'))
-
-    renderDetailPage()
-
-    expect(await screen.findByRole('heading', { name: 'c1' })).toBeInTheDocument()
-  })
-
   it('submits a status change and refetches the application afterward', async () => {
     const user = userEvent.setup()
     getApplicationMock
       .mockResolvedValueOnce(detail)
       .mockResolvedValueOnce({ ...detail, currentStatus: 'Offer' })
-    getCompanyMock.mockResolvedValue(company)
     changeApplicationStatusMock.mockResolvedValue({ ...detail, currentStatus: 'Offer' })
 
     renderDetailPage()
@@ -135,7 +108,6 @@ describe('ApplicationDetailPage', () => {
   it('adds an interview and refetches the application afterward', async () => {
     const user = userEvent.setup()
     getApplicationMock.mockResolvedValue(detail)
-    getCompanyMock.mockResolvedValue(company)
     addInterviewMock.mockResolvedValue({
       interviewDate: '2026-09-20T10:00:00.000Z',
       roundType: 'Onsite',
@@ -162,7 +134,6 @@ describe('ApplicationDetailPage', () => {
   it('adds a note and refetches the application afterward', async () => {
     const user = userEvent.setup()
     getApplicationMock.mockResolvedValue(detail)
-    getCompanyMock.mockResolvedValue(company)
     addNoteMock.mockResolvedValue({ createdAt: '2026-09-07T00:00:00Z', text: 'Follow-up scheduled' })
 
     renderDetailPage()

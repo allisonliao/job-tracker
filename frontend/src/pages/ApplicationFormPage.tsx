@@ -29,8 +29,8 @@ export function ApplicationFormPage() {
   const initialValues: ApplicationRequest | undefined =
     isEditMode && existing
       ? {
-          companyId: existing.companyId,
-          jobPostingId: existing.jobPostingId,
+          companyName: existing.companyName,
+          applicationLink: existing.applicationLink,
           currentStatus: existing.currentStatus,
           dateApplied: existing.dateApplied,
           lastContactDate: existing.lastContactDate,

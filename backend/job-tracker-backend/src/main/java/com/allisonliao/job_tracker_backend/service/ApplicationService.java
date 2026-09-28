@@ -38,7 +38,7 @@ public class ApplicationService {
     }
 
     /**
-     * Updates the non-status fields of an application (dates, jobPostingId, etc).
+     * Updates the non-status fields of an application (dates, applicationLink, etc).
      * Status changes must go through {@link #changeStatus} instead, since those
      * also need to append a StatusChangeItem to the history.
      */
@@ -87,10 +87,6 @@ public class ApplicationService {
         return applicationRepository.findAll();
     }
 
-    public List<ApplicationItem> listForCompany(String companyId) {
-        return applicationRepository.findAllForCompany(companyId);
-    }
-
     public List<ApplicationItem> listByStatus(String status) {
         return applicationRepository.findByStatus(status);
     }
@@ -128,15 +124,12 @@ public class ApplicationService {
     }
 
     /**
-     * Recomputes all 3 GSI attribute pairs from the item's own fields. Called before
-     * every save so the indexes never drift out of sync with companyId/currentStatus/
-     * followUpDate. GSI3 is left unset (null) when there's no followUpDate — verified
-     * by ApplicationRepositoryTest to keep that index correctly sparse.
+     * Recomputes both GSI attribute pairs from the item's own fields. Called before
+     * every save so the indexes never drift out of sync with currentStatus/followUpDate.
+     * GSI3 is left unset (null) when there's no followUpDate — verified by
+     * ApplicationRepositoryTest to keep that index correctly sparse.
      */
     private void populateGsiAttributes(ApplicationItem item) {
-        item.setGsi1Pk("COMPANY#" + item.getCompanyId());
-        item.setGsi1Sk("APPLICATION#" + item.getApplicationId());
-
         item.setGsi2Pk("STATUS#" + item.getCurrentStatus());
         item.setGsi2Sk(item.getDateApplied() != null ? item.getDateApplied().toString() : null);
 

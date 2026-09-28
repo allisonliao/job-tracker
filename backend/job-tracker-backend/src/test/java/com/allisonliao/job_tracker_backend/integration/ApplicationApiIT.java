@@ -18,7 +18,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.allisonliao.job_tracker_backend.dto.ApplicationRequest;
-import com.allisonliao.job_tracker_backend.dto.CompanyRequest;
 import com.allisonliao.job_tracker_backend.dto.InterviewRequest;
 import com.allisonliao.job_tracker_backend.dto.NoteRequest;
 import com.allisonliao.job_tracker_backend.dto.StatusChangeRequest;
@@ -32,18 +31,8 @@ class ApplicationApiIT extends MiniStackTestBase {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private String createCompany() throws Exception {
-        CompanyRequest company = new CompanyRequest("Application Test Co " + UUID.randomUUID(), null, null, null);
-        String body = mockMvc.perform(post("/api/companies")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(company)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
-        return objectMapper.readTree(body).get("companyId").asText();
-    }
-
-    private String createApplication(String companyId, String status, LocalDate dateApplied, LocalDate followUpDate) throws Exception {
-        ApplicationRequest request = new ApplicationRequest(companyId, null, status, dateApplied, null, followUpDate, null);
+    private String createApplication(String companyName, String status, LocalDate dateApplied, LocalDate followUpDate) throws Exception {
+        ApplicationRequest request = new ApplicationRequest(companyName, null, status, dateApplied, null, followUpDate, null);
         String body = mockMvc.perform(post("/api/applications")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -54,8 +43,8 @@ class ApplicationApiIT extends MiniStackTestBase {
 
     @Test
     void fullCrudLifecycleThroughTheRealApi() throws Exception {
-        String companyId = createCompany();
-        String applicationId = createApplication(companyId, "Applied", LocalDate.of(2026, 9, 1), null);
+        String companyName = "Acme Co " + UUID.randomUUID();
+        String applicationId = createApplication(companyName, "Applied", LocalDate.of(2026, 9, 1), null);
 
         mockMvc.perform(get("/api/applications/" + applicationId))
                 .andExpect(status().isOk())
@@ -65,7 +54,7 @@ class ApplicationApiIT extends MiniStackTestBase {
                 .andExpect(jsonPath("$.notes").isEmpty());
 
         ApplicationRequest updateRequest = new ApplicationRequest(
-                companyId, null, "Applied", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5), null, null);
+                companyName, null, "Applied", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5), null, null);
         mockMvc.perform(put("/api/applications/" + applicationId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
@@ -81,8 +70,7 @@ class ApplicationApiIT extends MiniStackTestBase {
 
     @Test
     void changeStatusRecordsHistoryAndIsReflectedInDetailAndListByStatus() throws Exception {
-        String companyId = createCompany();
-        String applicationId = createApplication(companyId, "Applied", LocalDate.of(2026, 9, 1), null);
+        String applicationId = createApplication("Acme Co", "Applied", LocalDate.of(2026, 9, 1), null);
 
         StatusChangeRequest statusChange = new StatusChangeRequest("Interviewing", "Recruiter call scheduled");
         mockMvc.perform(post("/api/applications/" + applicationId + "/status")
@@ -104,8 +92,7 @@ class ApplicationApiIT extends MiniStackTestBase {
 
     @Test
     void addsInterviewsAndNotesVisibleInDetail() throws Exception {
-        String companyId = createCompany();
-        String applicationId = createApplication(companyId, "Interviewing", LocalDate.of(2026, 9, 1), null);
+        String applicationId = createApplication("Acme Co", "Interviewing", LocalDate.of(2026, 9, 1), null);
 
         InterviewRequest interview = new InterviewRequest(Instant.parse("2026-09-10T14:00:00Z"), "Phone Screen", "Went well");
         mockMvc.perform(post("/api/applications/" + applicationId + "/interviews")
@@ -128,31 +115,20 @@ class ApplicationApiIT extends MiniStackTestBase {
     }
 
     @Test
-    void listsApplicationsForCompanyAndForAllUnfiltered() throws Exception {
-        String companyId = createCompany();
-        String otherCompanyId = createCompany();
-        String app1 = createApplication(companyId, "Applied", LocalDate.of(2026, 9, 1), null);
-        String app2 = createApplication(companyId, "Applied", LocalDate.of(2026, 9, 2), null);
-        String otherCompanyApp = createApplication(otherCompanyId, "Applied", LocalDate.of(2026, 9, 1), null);
-
-        mockMvc.perform(get("/api/applications").param("companyId", companyId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].applicationId", hasItem(app1)))
-                .andExpect(jsonPath("$[*].applicationId", hasItem(app2)))
-                .andExpect(jsonPath("$[*].applicationId", org.hamcrest.Matchers.not(hasItem(otherCompanyApp))));
+    void listsAllApplicationsUnfiltered() throws Exception {
+        String app1 = createApplication("Acme Co", "Applied", LocalDate.of(2026, 9, 1), null);
+        String app2 = createApplication("Beta Inc", "Applied", LocalDate.of(2026, 9, 2), null);
 
         mockMvc.perform(get("/api/applications"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].applicationId", hasItem(app1)))
-                .andExpect(jsonPath("$[*].applicationId", hasItem(app2)))
-                .andExpect(jsonPath("$[*].applicationId", hasItem(otherCompanyApp)));
+                .andExpect(jsonPath("$[*].applicationId", hasItem(app2)));
     }
 
     @Test
     void upcomingReturnsOnlyApplicationsDueByCutoff() throws Exception {
-        String companyId = createCompany();
-        String dueSoon = createApplication(companyId, "Applied", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5));
-        String dueLater = createApplication(companyId, "Applied", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 1));
+        String dueSoon = createApplication("Acme Co", "Applied", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 5));
+        String dueLater = createApplication("Acme Co", "Applied", LocalDate.of(2026, 9, 1), LocalDate.of(2026, 12, 1));
 
         mockMvc.perform(get("/api/applications/upcoming").param("dueBy", "2026-09-10"))
                 .andExpect(status().isOk())

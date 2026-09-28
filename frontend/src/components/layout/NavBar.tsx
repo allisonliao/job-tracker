@@ -7,7 +7,6 @@ export function NavBar() {
         Dashboard
       </NavLink>
       <NavLink to="/applications">Applications</NavLink>
-      <NavLink to="/companies">Companies</NavLink>
     </nav>
   )
 }
