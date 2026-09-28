@@ -69,7 +69,7 @@ export function ApplicationForm({ initialValues, onSubmit, submitLabel = 'Save' 
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form className="application-form" onSubmit={handleSubmit}>
       <label>
         Company
         <select
@@ -156,7 +156,11 @@ export function ApplicationForm({ initialValues, onSubmit, submitLabel = 'Save' 
       <button type="submit" disabled={submitting}>
         {submitLabel}
       </button>
-      {error && <span role="alert">{error}</span>}
+      {error && (
+        <span className="error-message" role="alert">
+          {error}
+        </span>
+      )}
     </form>
   )
 }
